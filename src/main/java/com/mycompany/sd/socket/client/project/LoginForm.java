@@ -10,14 +10,14 @@ package com.mycompany.sd.socket.client.project;
  * @author Pc
  */
 public class LoginForm extends FormularioObserver{
-    private TCPSocketClient tcpSocketClient;
+    private GameClient gameClient;
     /**
      * Creates new form LoginForm
      */
     public LoginForm() {
         initComponents();
-        tcpSocketClient = new TCPSocketClient("localhost", 12345, this);
-        tcpSocketClient.connect();
+        gameClient = new GameClient(this);
+        gameClient.connect();
     }
 
     /**
@@ -107,7 +107,7 @@ public class LoginForm extends FormularioObserver{
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        RegisterForm registerForm = new RegisterForm(tcpSocketClient);
+        RegisterForm registerForm = new RegisterForm(gameClient);
         registerForm.setVisible(true);
         dispose();
     }//GEN-LAST:event_jButton2ActionPerformed
@@ -119,9 +119,9 @@ public class LoginForm extends FormularioObserver{
     private void handleLogin() {
         String username = jTextField1.getText();
         String password = new String(jTextField2.getText());
-        if (tcpSocketClient.isConnected()) {
+        if (gameClient.isConnected()) {
             String loginMessage = "LOGIN:" + username + ":" + password;
-            tcpSocketClient.sendMessage(loginMessage);
+            gameClient.sendMessage(loginMessage);
         } else {
             jLabel3.setText("No hay conexión con el servidor.");
         }
@@ -134,7 +134,7 @@ public class LoginForm extends FormularioObserver{
     @Override
     public void sendMessage(String message){
         if("SUCCESS".equals(message)){
-            MainForm mainForm = new MainForm(tcpSocketClient);
+            MainForm mainForm = new MainForm(gameClient);
             mainForm.setVisible(true);
             dispose();
         }

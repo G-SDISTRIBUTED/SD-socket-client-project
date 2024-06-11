@@ -22,16 +22,12 @@ public class TCPSocketClient {
     private Socket socket;
     private BufferedReader input;
     private PrintWriter output;
-    private FormularioObserver form;
+    private final GameClient gameClient;
 
-    public TCPSocketClient(String host, int port, LoginForm form) {
+    public TCPSocketClient(String host, int port, GameClient gameClient) {
         this.host = host;
         this.port = port;
-        this.form = form;
-    }
-
-    public void changeForm(FormularioObserver form) {
-        this.form = form;
+        this.gameClient = gameClient;
     }
     
     public void connect() {
@@ -43,9 +39,9 @@ public class TCPSocketClient {
             new Thread(this::listenForMessages).start();
             new ConnectionChecker(this).start();
 
-            form.updateStatus("Conectado al servidor.");
+            gameClient.updateStatus("Conectado al servidor.");
         } catch (IOException e) {
-            form.updateStatus("No se pudo conectar al servidor.");
+            gameClient.updateStatus("No se pudo conectar al servidor.");
             reconnect();
         }
     }
@@ -58,28 +54,14 @@ public class TCPSocketClient {
         try {
             String message;
             while ((message = input.readLine()) != null) {
-                handleServerMessage(message);
+                gameClient.handleServerMessage(message);
             }
         } catch (IOException e) {
-            form.updateStatus("Conexión perdida.");
+            gameClient.updateStatus("Conexión perdida.");
             reconnect();
         }
     }
     
-    private void handleServerMessage(String message) {
-        if (message.startsWith("LOGIN_SUCCESS")) {
-            form.updateStatus("Inicio de sesión exitoso.");
-            form.sendMessage("SUCCESS");
-        } else if (message.startsWith("LOGIN_FAILURE")) {
-            form.updateStatus("Inicio de sesión fallido.");
-        } else if (message.startsWith("REGISTER_SUCCESS")) {
-            form.updateStatus("Registro exitoso. Inicie sesión.");
-            form.sendMessage("SUCCESS");
-        } else if (message.startsWith("REGISTER_FAILURE")) {
-            form.updateStatus("Registro fallido.");
-        }
-    }
-
     public void sendPing() {
         output.println("PING hacia el servidor...");
     }

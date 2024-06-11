@@ -10,14 +10,14 @@ package com.mycompany.sd.socket.client.project;
  * @author Pc
  */
 public class MainForm extends FormularioObserver {
-    private TCPSocketClient tcpSocketClient;
+    private GameClient gameClient;
     /**
      * Creates new form MainForm
      */
-    public MainForm(TCPSocketClient tcpSocketClient) {
+    public MainForm(GameClient gameClient) {
         initComponents();
-        this.tcpSocketClient = tcpSocketClient;
-        this.tcpSocketClient.changeForm(this);
+        this.gameClient = gameClient;
+        this.gameClient.changeForm(this);
     }
 
     /**

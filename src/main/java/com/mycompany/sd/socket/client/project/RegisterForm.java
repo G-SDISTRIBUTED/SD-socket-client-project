@@ -10,14 +10,14 @@ package com.mycompany.sd.socket.client.project;
  * @author Pc
  */
 public class RegisterForm extends FormularioObserver{
-    private TCPSocketClient tcpSocketClient;
+    private GameClient gameClient;
     /**
      * Creates new form RegisterForm
      */
-    public RegisterForm(TCPSocketClient tcpSocketClient) {
+    public RegisterForm(GameClient gameClient) {
         initComponents();
-        this.tcpSocketClient = tcpSocketClient;
-        this.tcpSocketClient.changeForm(this);
+        this.gameClient = gameClient;
+        this.gameClient.changeForm(this);
     }
 
     /**
@@ -100,10 +100,10 @@ public class RegisterForm extends FormularioObserver{
     private void handleRegister() {
         String username = jTextField1.getText();
         String password = new String(jTextField2.getText());
-        if (tcpSocketClient.isConnected()) {
+        if (gameClient.isConnected()) {
             jLabel3.setText("Registrando..");
             String registerMessage = "REGISTER:" + username + ":" + password;
-            tcpSocketClient.sendMessage(registerMessage);
+            gameClient.sendMessage(registerMessage);
         } else {
             jLabel3.setText("No hay conexión con el servidor.");
         }
@@ -116,7 +116,7 @@ public class RegisterForm extends FormularioObserver{
     @Override
         public void sendMessage(String message){
             if("SUCCESS".equals(message)){
-                MainForm mainForm = new MainForm(tcpSocketClient);
+                MainForm mainForm = new MainForm(gameClient);
                 mainForm.setVisible(true);
                 dispose();
             }
