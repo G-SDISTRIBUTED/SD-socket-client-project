@@ -9,7 +9,7 @@ package com.mycompany.sd.socket.client.project;
  *
  * @author Pc
  */
-public class RegisterForm extends javax.swing.JFrame {
+public class RegisterForm extends FormularioObserver{
     private TCPSocketClient tcpSocketClient;
     /**
      * Creates new form RegisterForm
@@ -17,6 +17,7 @@ public class RegisterForm extends javax.swing.JFrame {
     public RegisterForm(TCPSocketClient tcpSocketClient) {
         initComponents();
         this.tcpSocketClient = tcpSocketClient;
+        this.tcpSocketClient.changeForm(this);
     }
 
     /**
@@ -108,10 +109,18 @@ public class RegisterForm extends javax.swing.JFrame {
         }
     }
     
+    @Override
     public void updateStatus(String message) {
         jLabel3.setText(message);
     }
-
+    @Override
+        public void sendMessage(String message){
+            if("SUCCESS".equals(message)){
+                MainForm mainForm = new MainForm(tcpSocketClient);
+                mainForm.setVisible(true);
+                dispose();
+            }
+        }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;

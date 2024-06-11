@@ -9,7 +9,7 @@ package com.mycompany.sd.socket.client.project;
  *
  * @author Pc
  */
-public class LoginForm extends javax.swing.JFrame {
+public class LoginForm extends FormularioObserver{
     private TCPSocketClient tcpSocketClient;
     /**
      * Creates new form LoginForm
@@ -127,8 +127,17 @@ public class LoginForm extends javax.swing.JFrame {
         }
     }
     
+    @Override
     public void updateStatus(String message) {
         jLabel3.setText(message);
+    }
+    @Override
+    public void sendMessage(String message){
+        if("SUCCESS".equals(message)){
+            MainForm mainForm = new MainForm(tcpSocketClient);
+            mainForm.setVisible(true);
+            dispose();
+        }
     }
     
     /**

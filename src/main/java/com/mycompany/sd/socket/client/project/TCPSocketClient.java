@@ -22,14 +22,18 @@ public class TCPSocketClient {
     private Socket socket;
     private BufferedReader input;
     private PrintWriter output;
-    private LoginForm loginForm;
+    private FormularioObserver form;
 
-    public TCPSocketClient(String host, int port, LoginForm loginForm) {
+    public TCPSocketClient(String host, int port, LoginForm form) {
         this.host = host;
         this.port = port;
-        this.loginForm = loginForm;
+        this.form = form;
     }
 
+    public void changeForm(FormularioObserver form) {
+        this.form = form;
+    }
+    
     public void connect() {
         try {
             socket = new Socket(host, port);
@@ -39,9 +43,9 @@ public class TCPSocketClient {
             new Thread(this::listenForMessages).start();
             new ConnectionChecker(this).start();
 
-            loginForm.updateStatus("Conectado al servidor.");
+            form.updateStatus("Conectado al servidor.");
         } catch (IOException e) {
-            loginForm.updateStatus("No se pudo conectar al servidor.");
+            form.updateStatus("No se pudo conectar al servidor.");
             reconnect();
         }
     }
@@ -57,26 +61,22 @@ public class TCPSocketClient {
                 handleServerMessage(message);
             }
         } catch (IOException e) {
-            loginForm.updateStatus("Conexión perdida.");
+            form.updateStatus("Conexión perdida.");
             reconnect();
         }
     }
     
     private void handleServerMessage(String message) {
         if (message.startsWith("LOGIN_SUCCESS")) {
-            loginForm.updateStatus("Inicio de sesión exitoso.");
-            MainForm mainForm = new MainForm();
-            mainForm.setVisible(true);
-            loginForm.dispose();
+            form.updateStatus("Inicio de sesión exitoso.");
+            form.sendMessage("SUCCESS");
         } else if (message.startsWith("LOGIN_FAILURE")) {
-            loginForm.updateStatus("Inicio de sesión fallido.");
+            form.updateStatus("Inicio de sesión fallido.");
         } else if (message.startsWith("REGISTER_SUCCESS")) {
-            loginForm.updateStatus("Registro exitoso. Inicie sesión.");
-            MainForm mainForm = new MainForm();
-            mainForm.setVisible(true);
-            loginForm.dispose();
+            form.updateStatus("Registro exitoso. Inicie sesión.");
+            form.sendMessage("SUCCESS");
         } else if (message.startsWith("REGISTER_FAILURE")) {
-            loginForm.updateStatus("Registro fallido.");
+            form.updateStatus("Registro fallido.");
         }
     }
 
