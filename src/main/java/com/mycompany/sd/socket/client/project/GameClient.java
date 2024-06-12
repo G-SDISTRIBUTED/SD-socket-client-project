@@ -3,13 +3,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.mycompany.sd.socket.client.project;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
-
+import com.mycompany.paquete.*;
+import com.mycompany.paquete.Paquete;
+import com.google.gson.Gson;
 /**
  *
  * @author Hp
@@ -17,16 +13,25 @@ import java.net.Socket;
 public class GameClient {
     private FormularioObserver form;
     private TCPSocketClient tcpSocketClient;
-
+    private Usuario usuario;
+    
     public GameClient(LoginForm form) {
         this.form = form;
-        this.tcpSocketClient = new TCPSocketClient("localhost", 12345,this);
+        this.tcpSocketClient = new TCPSocketClient("localhost", 12345, this);
     }
 
     public void changeForm(FormularioObserver form) {
         this.form = form;
     }
-      
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+    
     public void connect() {
         tcpSocketClient.connect();
     }
@@ -58,7 +63,51 @@ public class GameClient {
             form.sendMessage("SUCCESS");
         } else if (message.startsWith("REGISTER_FAILURE")) {
             form.updateStatus("Registro fallido.");
+        }else if (message.startsWith("SALA_CREATED")){
+            form.sendMessage("SUCCESS");
         }
     }
-
+    
+    public void handleLogin(String username,String password) {
+        if (isConnected()) {
+            usuario = new Usuario(username, password);
+            Paquete paquete = new Paquete(usuario, "login");
+            Gson gson = new Gson();
+            String jsonString = gson.toJson(paquete);
+            sendMessage(jsonString);
+        } else {
+            updateStatus("No hay conexión con el servidor.");
+        }
+    }
+    
+    public void handleRegister(String username,String password) {
+        if (isConnected()) {
+            usuario = new Usuario(username, password);
+            Paquete paquete = new Paquete(usuario, "register");
+            
+            Gson gson = new Gson();
+            String loginMessage = gson.toJson(paquete);
+            System.out.println("message: "+loginMessage);
+            sendMessage(loginMessage);
+        } else {
+            updateStatus("No hay conexión con el servidor.");
+        }
+    }
+    
+    public void handleCreateSala(String name){
+        if (isConnected()) {
+            Sala sala = new Sala(name, usuario);
+            Paquete paquete = new Paquete(sala, "create sala");
+            
+            Gson gson = new Gson();
+            String mensaje = gson.toJson(paquete);
+            sendMessage(mensaje);
+        } else {
+            updateStatus("No hay conexión con el servidor.");
+        }
+    }
+    
+    public void handleJoinSala(){
+        
+    }
 }

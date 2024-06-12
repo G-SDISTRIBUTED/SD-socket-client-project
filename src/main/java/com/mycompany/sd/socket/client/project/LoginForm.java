@@ -119,12 +119,7 @@ public class LoginForm extends FormularioObserver{
     private void handleLogin() {
         String username = jTextField1.getText();
         String password = new String(jTextField2.getText());
-        if (gameClient.isConnected()) {
-            String loginMessage = "LOGIN:" + username + ":" + password;
-            gameClient.sendMessage(loginMessage);
-        } else {
-            jLabel3.setText("No hay conexión con el servidor.");
-        }
+        gameClient.handleLogin(username, password);
     }
     
     @Override
