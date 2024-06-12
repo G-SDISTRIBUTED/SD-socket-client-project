@@ -6,6 +6,7 @@ package com.mycompany.sd.socket.client.project;
 import com.mycompany.paquete.*;
 import com.mycompany.paquete.Paquete;
 import com.google.gson.Gson;
+import java.awt.List;
 /**
  *
  * @author Hp
@@ -64,7 +65,9 @@ public class GameClient {
         } else if (message.startsWith("REGISTER_FAILURE")) {
             form.updateStatus("Registro fallido.");
         }else if (message.startsWith("SALA_CREATED")){
-            form.sendMessage("SUCCESS");
+            form.sendMessage(message);
+        }else if (message.startsWith("SALA_JOINED")){
+            form.sendMessage(message);
         }
     }
     
@@ -107,7 +110,20 @@ public class GameClient {
         }
     }
     
-    public void handleJoinSala(){
-        
+    public void handleJoinSala(Integer tokenSala){
+        if (isConnected()) {
+            Sala sala = new Sala(tokenSala);
+            Paquete paquete = new Paquete(usuario, sala, "join sala");
+            
+            Gson gson = new Gson();
+            String mensaje = gson.toJson(paquete);
+            sendMessage(mensaje);
+        } else {
+            updateStatus("No hay conexión con el servidor.");
+        }
+    }
+    
+    public String getSalas(){
+        return "";
     }
 }

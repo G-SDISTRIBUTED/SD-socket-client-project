@@ -10,11 +10,17 @@ package com.mycompany.sd.socket.client.project;
  */
 public class SalaForm extends FormularioObserver {
     private GameClient gameClient;
+    private Integer token;
+    private String nombre;
     
-    public SalaForm(GameClient gameClient) {
+    public SalaForm(GameClient gameClient, Integer token, String nombre) {
         initComponents();
         this.gameClient = gameClient;
         this.gameClient.changeForm(this);
+        this.token = token;
+        this.nombre = nombre;
+        jLabel1.setText("Token Sala: "+token);
+        jLabel2.setText("Nombre Sala: "+nombre);
     }
     
     
@@ -28,6 +34,7 @@ public class SalaForm extends FormularioObserver {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -38,16 +45,20 @@ public class SalaForm extends FormularioObserver {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(150, 150, 150)
-                .addComponent(jLabel1)
-                .addContainerGap(222, Short.MAX_VALUE))
+                .addGap(25, 25, 25)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel2)
+                    .addComponent(jLabel1))
+                .addContainerGap(347, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(28, 28, 28)
+                .addContainerGap()
                 .addComponent(jLabel1)
-                .addContainerGap(256, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel2)
+                .addContainerGap(272, Short.MAX_VALUE))
         );
 
         pack();
@@ -56,5 +67,6 @@ public class SalaForm extends FormularioObserver {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     // End of variables declaration//GEN-END:variables
 }

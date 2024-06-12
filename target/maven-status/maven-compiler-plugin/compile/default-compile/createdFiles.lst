@@ -1,11 +1,13 @@
 com\mycompany\sd\socket\client\project\LoginForm$1.class
 com\mycompany\sd\socket\client\project\LoginForm.class
+com\mycompany\sd\socket\client\project\MainForm$2.class
 com\mycompany\sd\socket\client\project\RegisterForm$1.class
 com\mycompany\sd\socket\client\project\SalaForm.class
 com\mycompany\sd\socket\client\project\Packet.class
 com\mycompany\sd\socket\client\project\ConnectionChecker.class
 com\mycompany\sd\socket\client\project\LoginForm$2.class
 com\mycompany\sd\socket\client\project\TCPSocketClient.class
+com\mycompany\sd\socket\client\project\MainForm$3.class
 com\mycompany\sd\socket\client\project\RegisterForm.class
 com\mycompany\sd\socket\client\project\LoginForm$3.class
 com\mycompany\sd\socket\client\project\MainForm.class
