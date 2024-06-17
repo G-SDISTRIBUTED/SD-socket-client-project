@@ -37,7 +37,7 @@ public class TCPSocketClient {
             output = new PrintWriter(socket.getOutputStream(), true);
 
             new Thread(this::listenForMessages).start();
-            new ConnectionChecker(this).start();
+            //new ConnectionChecker(this).start();
 
             gameClient.updateStatus("Conectado al servidor.");
         } catch (IOException e) {

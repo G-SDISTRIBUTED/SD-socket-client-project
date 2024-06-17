@@ -4,6 +4,9 @@
  * and open the template in the editor.
  */
 package com.mycompany.sd.socket.client.project;
+import com.mycompany.paquete.Sala;
+import java.util.*;
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
@@ -13,7 +16,9 @@ import javax.swing.JOptionPane;
  * @author Pc
  */
 public class MainForm extends FormularioObserver {
-    private GameClient gameClient;
+    private final GameClient gameClient;
+    private List<Sala> rooms = new ArrayList<>();
+    Thread getRoomsThread;
     /**
      * Creates new form MainForm
      */
@@ -21,6 +26,9 @@ public class MainForm extends FormularioObserver {
         initComponents();
         this.gameClient = gameClient;
         this.gameClient.changeForm(this);
+        
+        getRoomsThread = new Thread(this::getRooms);
+        getRoomsThread.start();
     }
 
     @Override
@@ -30,13 +38,11 @@ public class MainForm extends FormularioObserver {
     
     @Override
     public void sendMessage(String message){
-        if(containsNumber(message)){
-            String[] array = message.split(" ");
-            Integer token = Integer.parseInt(array[1]);
-            String nombre = array[2];
-            SalaForm salaForm = new SalaForm(gameClient, token, nombre);
+        if("Room created".equals(message)){
+            SalaForm salaForm = new SalaForm(gameClient);
             salaForm.setVisible(true);
             dispose();
+            getRoomsThread.interrupt();
         }
     }
     
@@ -44,6 +50,30 @@ public class MainForm extends FormularioObserver {
         Pattern pattern = Pattern.compile("\\d"); // Expresión regular para dígitos
         Matcher matcher = pattern.matcher(input);
         return matcher.find();
+    }
+    
+    public void getRooms(){
+        try{
+            while(true){
+                gameClient.handleGetRooms();
+                Thread.sleep(10000);
+            }
+        }catch(InterruptedException e){
+            System.out.println(e.getMessage());
+        }
+    }
+    
+    @Override
+    public void actualizarRooms(List<Sala> rooms){
+        this.rooms = rooms;
+    }
+    
+    public void actualizarLista(){
+        listRooms.removeAll();
+        for(int i=0; i < rooms.size(); i++){
+            Sala room = rooms.get(i);
+            listRooms.add(room.toString());
+        }
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -60,8 +90,7 @@ public class MainForm extends FormularioObserver {
         jTextField1 = new javax.swing.JTextField();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
+        listRooms = new java.awt.List();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -88,9 +117,11 @@ public class MainForm extends FormularioObserver {
             }
         });
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane1.setViewportView(jTextArea1);
+        listRooms.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                listRoomsActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -102,39 +133,42 @@ public class MainForm extends FormularioObserver {
                         .addGap(174, 174, 174)
                         .addComponent(status))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(114, 114, 114)
+                        .addContainerGap()
+                        .addComponent(jButton3)
+                        .addGap(32, 32, 32)
                         .addComponent(jButton1))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(57, 57, 57)
+                        .addContainerGap()
+                        .addComponent(listRooms, javax.swing.GroupLayout.PREFERRED_SIZE, 358, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(55, 55, 55)
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(jButton2))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(16, 16, 16)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton3)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 324, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(38, Short.MAX_VALUE))
+                        .addComponent(jButton2)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(23, 23, 23)
-                .addComponent(jButton1)
-                .addGap(12, 12, 12)
-                .addComponent(jButton3)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(23, 23, 23)
+                        .addComponent(jButton1))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(15, 15, 15)
+                        .addComponent(jButton3)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 50, Short.MAX_VALUE)
+                .addComponent(listRooms, javax.swing.GroupLayout.DEFAULT_SIZE, 174, Short.MAX_VALUE)
+                .addGap(25, 25, 25)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1)
                     .addComponent(jButton2))
-                .addGap(47, 47, 47)
+                .addGap(32, 32, 32)
                 .addComponent(status)
-                .addGap(5, 5, 5))
+                .addGap(11, 11, 11))
         );
 
         pack();
@@ -146,14 +180,21 @@ public class MainForm extends FormularioObserver {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        //FALTA
-        gameClient.getSalas();
+        listRooms.removeAll();
+        
+        for(int i=0; i < rooms.size(); i++){
+            listRooms.add(rooms.get(i).toString());
+        }
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         Integer tokenSala = Integer.parseInt(jTextField1.getText());
-        gameClient.handleJoinSala(tokenSala);
+        gameClient.handleRequestJoinRoom(tokenSala);
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void listRoomsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_listRoomsActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_listRoomsActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -161,9 +202,8 @@ public class MainForm extends FormularioObserver {
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextField jTextField1;
+    private java.awt.List listRooms;
     private javax.swing.JLabel status;
     // End of variables declaration//GEN-END:variables
 }

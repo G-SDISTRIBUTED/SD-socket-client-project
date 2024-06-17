@@ -4,26 +4,62 @@
  */
 package com.mycompany.sd.socket.client.project;
 
+import com.mycompany.paquete.Sala;
+import com.mycompany.paquete.Usuario;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author Hp
  */
 public class SalaForm extends FormularioObserver {
     private GameClient gameClient;
+    private Sala room;
     private Integer token;
     private String nombre;
     
-    public SalaForm(GameClient gameClient, Integer token, String nombre) {
+    public SalaForm(GameClient gameClient) {
         initComponents();
         this.gameClient = gameClient;
         this.gameClient.changeForm(this);
-        this.token = token;
-        this.nombre = nombre;
-        jLabel1.setText("Token Sala: "+token);
-        jLabel2.setText("Nombre Sala: "+nombre);
     }
     
+    @Override
+    public void setRoom(Sala room){
+        this.room = room;
+        
+        jLabel1.setText("Token Sala: "+this.room.getToken());
+        jLabel2.setText("Nombre Sala: "+this.room.getName());
+        jLabel3.setText("Creador Sala: "+this.room.getCreador().getUsername());
+    }
     
+    @Override
+    public void  hadARequestFrom(Usuario usuario){
+        String nombre = usuario.getUsername();
+        int resultado = JOptionPane.showOptionDialog(
+                this,
+                "¿Desea aceptar o rechazar la acción?",
+                "El usuario "+ nombre+" quiere unirse a la sala",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null, // Icono predeterminado
+                new Object[]{"Aceptar", "Rechazar"}, // Texto de los botones
+                "Aceptar" // Botón predeterminado
+        );
+        switch (resultado) {
+            case JOptionPane.YES_OPTION:
+                System.out.println("Has seleccionado 'Aceptar'.");
+                gameClient.handleAcceptRequestJoin(token, usuario);
+                break;
+            case JOptionPane.NO_OPTION:
+                System.out.println("Has seleccionado 'Rechazar'.");
+                gameClient.handleRejectRequestJoin(token, usuario);
+                break;
+            default:
+                System.out.println("Cuadro de diálogo cerrado sin seleccionar una opción.");
+                break;
+        }
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -35,6 +71,7 @@ public class SalaForm extends FormularioObserver {
 
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -47,6 +84,7 @@ public class SalaForm extends FormularioObserver {
             .addGroup(layout.createSequentialGroup()
                 .addGap(25, 25, 25)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel3)
                     .addComponent(jLabel2)
                     .addComponent(jLabel1))
                 .addContainerGap(347, Short.MAX_VALUE))
@@ -58,7 +96,9 @@ public class SalaForm extends FormularioObserver {
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2)
-                .addContainerGap(272, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(jLabel3)
+                .addContainerGap(254, Short.MAX_VALUE))
         );
 
         pack();
@@ -68,5 +108,6 @@ public class SalaForm extends FormularioObserver {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     // End of variables declaration//GEN-END:variables
 }

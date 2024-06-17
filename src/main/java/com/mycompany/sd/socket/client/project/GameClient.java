@@ -6,7 +6,11 @@ package com.mycompany.sd.socket.client.project;
 import com.mycompany.paquete.*;
 import com.mycompany.paquete.Paquete;
 import com.google.gson.Gson;
-import java.awt.List;
+import com.google.gson.reflect.TypeToken;
+import java.lang.ProcessBuilder.Redirect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 /**
  *
  * @author Hp
@@ -54,21 +58,59 @@ public class GameClient {
     }
     
     public void handleServerMessage(String message) {
-        if (message.startsWith("LOGIN_SUCCESS")) {
-            form.updateStatus("Inicio de sesión exitoso.");
-            form.sendMessage("SUCCESS");
-        } else if (message.startsWith("LOGIN_FAILURE")) {
-            form.updateStatus("Inicio de sesión fallido.");
-        } else if (message.startsWith("REGISTER_SUCCESS")) {
-            form.updateStatus("Registro exitoso. Inicie sesión.");
-            form.sendMessage("SUCCESS");
-        } else if (message.startsWith("REGISTER_FAILURE")) {
-            form.updateStatus("Registro fallido.");
-        }else if (message.startsWith("SALA_CREATED")){
-            form.sendMessage(message);
-        }else if (message.startsWith("SALA_JOINED")){
-            form.sendMessage(message);
+        Gson gson=new Gson();
+        StringBuilder jsonString = new StringBuilder();
+        jsonString.append(message);
+        Paquete paquete = gson.fromJson(jsonString.toString(), Paquete.class);
+        String comando = paquete.getComando();
+        if (null != comando) switch (comando) {
+            case "LOGIN_SUCCESS":{
+                form.updateStatus("Inicio de sesión exitoso.");
+                form.sendMessage("SUCCESS");
+                break;
+            }
+            case "LOGIN_FAILURE":{
+                form.updateStatus("Inicio de sesión fallido.");
+                break;
+            }
+            case "REGISTER_SUCCESS":{
+                form.updateStatus("Registro exitoso. Inicie sesión.");
+                form.sendMessage("SUCCESS");
+                break;
+            }
+            case "REGISTER_FAILURE": {
+                form.updateStatus("Registro fallido.");
+                break;
+            } 
+            case "SENDING ROOMS": {
+               String x= (String)paquete.getParams().getLast();
+               
+               form.actualizarRooms(stringToArray(x, Sala[].class));
+               break; 
+            }
+            case "ROOM_CREATED": {
+                Sala sala = (Sala) paquete.getSala();
+                form.sendMessage("Room created");
+                form.setRoom(sala);
+                break;
+            }
+            case "SALA_JOINED":{
+                String parametros = paquete.getStringParams();
+                form.sendMessage(parametros);
+                break;
+            }
+            case "RECIVING REQUEST TO JOIN ROOM":{
+                
+                break;
+            }
+            default:
+            break;
         }
+    }
+    
+    public static <T> List<T> stringToArray(String s, Class<T[]> clazz) {
+        T[] arr = new Gson().fromJson(s, clazz);
+        return Arrays.asList(arr); //or return Arrays.asList(new Gson().fromJson(s, clazz)); for a one-liner
     }
     
     public void handleLogin(String username,String password) {
@@ -100,8 +142,7 @@ public class GameClient {
     public void handleCreateSala(String name){
         if (isConnected()) {
             Sala sala = new Sala(name, usuario);
-            Paquete paquete = new Paquete(sala, "create sala");
-            
+            Paquete paquete = new Paquete(sala, "create room");
             Gson gson = new Gson();
             String mensaje = gson.toJson(paquete);
             sendMessage(mensaje);
@@ -110,11 +151,11 @@ public class GameClient {
         }
     }
     
-    public void handleJoinSala(Integer tokenSala){
+    public void handleRequestJoinRoom(Integer tokenSala){
         if (isConnected()) {
             Sala sala = new Sala(tokenSala);
-            Paquete paquete = new Paquete(usuario, sala, "join sala");
-            
+            Paquete paquete = new Paquete(sala, "join sala");
+            paquete.setUsuario(usuario);
             Gson gson = new Gson();
             String mensaje = gson.toJson(paquete);
             sendMessage(mensaje);
@@ -123,7 +164,44 @@ public class GameClient {
         }
     }
     
-    public String getSalas(){
-        return "";
+    public void handleAcceptRequestJoin(Integer tokenRoom, Usuario usuario){
+        if (isConnected()) {
+            Paquete paquete = new Paquete();
+            paquete.setComando("join request accepted");
+            paquete.addParam(tokenRoom);
+            paquete.addParam(usuario);
+            Gson gson = new Gson();
+            String mensaje = gson.toJson(paquete);
+            sendMessage(mensaje);
+        } else {
+            updateStatus("No hay conexión con el servidor.");
+        }
     }
+    
+    public void handleRejectRequestJoin(Integer tokenRoom, Usuario usuario){
+        if (isConnected()) {
+            Paquete paquete = new Paquete();
+            paquete.setComando("join request rejected");
+            paquete.addParam(tokenRoom);
+            paquete.addParam(usuario);
+            Gson gson = new Gson();
+            String mensaje = gson.toJson(paquete);
+            sendMessage(mensaje);
+        } else {
+            updateStatus("No hay conexión con el servidor.");
+        }
+    }
+    
+    public void handleGetRooms(){
+        if (isConnected()) {
+            Paquete paquete = new Paquete();
+            paquete.setComando("get rooms");
+            Gson gson = new Gson();
+            String mensaje = gson.toJson(paquete);
+            sendMessage(mensaje);
+        } else {
+            updateStatus("No hay conexión con el servidor.");
+        }
+    }
+    
 }
