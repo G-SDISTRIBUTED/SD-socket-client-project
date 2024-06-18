@@ -14,7 +14,8 @@ import java.util.List;
  */
 abstract class FormularioObserver extends javax.swing.JFrame {
     public void updateStatus(String message){}
-    public void sendMessage(String message){}
+    public void sendMessage(String message){}    
+    public void goRoom(){}
     public void hadARequestFrom(Usuario usuario){}
     void actualizarRooms(List<Sala> rooms) {}
     public void setRoom(Sala room){}

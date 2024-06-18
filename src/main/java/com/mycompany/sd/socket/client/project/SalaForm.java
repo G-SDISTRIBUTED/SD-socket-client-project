@@ -27,7 +27,8 @@ public class SalaForm extends FormularioObserver {
     @Override
     public void setRoom(Sala room){
         this.room = room;
-        
+        this.token = room.getToken();
+        this.nombre = room.getName();
         jLabel1.setText("Token Sala: "+this.room.getToken());
         jLabel2.setText("Nombre Sala: "+this.room.getName());
         jLabel3.setText("Creador Sala: "+this.room.getCreador().getUsername());
@@ -38,8 +39,8 @@ public class SalaForm extends FormularioObserver {
         String nombre = usuario.getUsername();
         int resultado = JOptionPane.showOptionDialog(
                 this,
-                "¿Desea aceptar o rechazar la acción?",
                 "El usuario "+ nombre+" quiere unirse a la sala",
+                "¿Desea aceptar o rechazar la acción?",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
                 null, // Icono predeterminado

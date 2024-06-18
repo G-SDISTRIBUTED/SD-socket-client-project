@@ -38,12 +38,15 @@ public class MainForm extends FormularioObserver {
     
     @Override
     public void sendMessage(String message){
-        if("Room created".equals(message)){
-            SalaForm salaForm = new SalaForm(gameClient);
+        jLabel2.setText(message);
+    }
+    
+    @Override
+    public void goRoom(){
+        SalaForm salaForm = new SalaForm(gameClient);
             salaForm.setVisible(true);
             dispose();
             getRoomsThread.interrupt();
-        }
     }
     
     public static boolean containsNumber(String input) {
@@ -66,6 +69,7 @@ public class MainForm extends FormularioObserver {
     @Override
     public void actualizarRooms(List<Sala> rooms){
         this.rooms = rooms;
+        actualizarLista();
     }
     
     public void actualizarLista(){
@@ -91,6 +95,7 @@ public class MainForm extends FormularioObserver {
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         listRooms = new java.awt.List();
+        jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -117,6 +122,11 @@ public class MainForm extends FormularioObserver {
             }
         });
 
+        listRooms.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                listRoomsItemStateChanged(evt);
+            }
+        });
         listRooms.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 listRoomsActionPerformed(evt);
@@ -138,16 +148,18 @@ public class MainForm extends FormularioObserver {
                         .addGap(32, 32, 32)
                         .addComponent(jButton1))
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(listRooms, javax.swing.GroupLayout.PREFERRED_SIZE, 358, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(55, 55, 55)
+                        .addGap(54, 54, 54)
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jButton2)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jButton2))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(listRooms, javax.swing.GroupLayout.DEFAULT_SIZE, 358, Short.MAX_VALUE)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addContainerGap(19, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -160,13 +172,15 @@ public class MainForm extends FormularioObserver {
                         .addGap(15, 15, 15)
                         .addComponent(jButton3)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(listRooms, javax.swing.GroupLayout.DEFAULT_SIZE, 174, Short.MAX_VALUE)
-                .addGap(25, 25, 25)
+                .addComponent(listRooms, javax.swing.GroupLayout.DEFAULT_SIZE, 172, Short.MAX_VALUE)
+                .addGap(16, 16, 16)
+                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1)
                     .addComponent(jButton2))
-                .addGap(32, 32, 32)
+                .addGap(18, 18, 18)
                 .addComponent(status)
                 .addGap(11, 11, 11))
         );
@@ -193,8 +207,17 @@ public class MainForm extends FormularioObserver {
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void listRoomsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_listRoomsActionPerformed
-        // TODO add your handling code here:
+        
     }//GEN-LAST:event_listRoomsActionPerformed
+
+    private void listRoomsItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_listRoomsItemStateChanged
+        
+        System.out.println("El item: "+listRooms.getSelectedItem());
+        System.out.println("Token de la sala seleccionada: " + rooms.get(listRooms.getSelectedIndex()).getToken());
+        
+        Integer tokenSala = rooms.get((Integer)listRooms.getSelectedIndex()).getToken();
+        gameClient.handleRequestJoinRoom(tokenSala);
+    }//GEN-LAST:event_listRoomsItemStateChanged
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -202,6 +225,7 @@ public class MainForm extends FormularioObserver {
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JTextField jTextField1;
     private java.awt.List listRooms;
     private javax.swing.JLabel status;

@@ -90,17 +90,31 @@ public class GameClient {
             }
             case "ROOM_CREATED": {
                 Sala sala = (Sala) paquete.getSala();
-                form.sendMessage("Room created");
+                form.goRoom();
+                form.setRoom(sala);
+                break;
+            }
+            case "RECIVING REQUEST TO JOIN ROOM":{
+                form.hadARequestFrom(paquete.getUsuario());
+                break;
+            }
+            case "REQUEST SENT":{
+                form.sendMessage("Esperando por aceptación...");
+                break;
+            }
+            case "REQUEST FAILED": {
+                form.sendMessage("Fallo la petición (talvez ya se cerro esa sala)");
+                break;
+            }
+            case "JOIN ROOM ACCEPTED": {
+                Sala sala = (Sala) paquete.getSala();
+                form.goRoom();
                 form.setRoom(sala);
                 break;
             }
             case "SALA_JOINED":{
                 String parametros = paquete.getStringParams();
                 form.sendMessage(parametros);
-                break;
-            }
-            case "RECIVING REQUEST TO JOIN ROOM":{
-                
                 break;
             }
             default:
@@ -153,8 +167,10 @@ public class GameClient {
     
     public void handleRequestJoinRoom(Integer tokenSala){
         if (isConnected()) {
-            Sala sala = new Sala(tokenSala);
-            Paquete paquete = new Paquete(sala, "join sala");
+//            Paquete paquete = new Paquete(sala, "request to join room");
+            Paquete paquete = new Paquete();
+            paquete.setComando("request to join room");
+            paquete.addParam(tokenSala.toString());
             paquete.setUsuario(usuario);
             Gson gson = new Gson();
             String mensaje = gson.toJson(paquete);
@@ -168,8 +184,8 @@ public class GameClient {
         if (isConnected()) {
             Paquete paquete = new Paquete();
             paquete.setComando("join request accepted");
-            paquete.addParam(tokenRoom);
-            paquete.addParam(usuario);
+            paquete.addParam(tokenRoom.toString());
+            paquete.setUsuario(usuario);
             Gson gson = new Gson();
             String mensaje = gson.toJson(paquete);
             sendMessage(mensaje);
