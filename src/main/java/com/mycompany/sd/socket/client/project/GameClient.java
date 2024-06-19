@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class GameClient {
     private FormularioObserver form;
-    private TCPSocketClient tcpSocketClient;
+    private final TCPSocketClient tcpSocketClient;
     private Usuario usuario;
     
     public GameClient(LoginForm form) {
@@ -112,6 +112,10 @@ public class GameClient {
                 form.setRoom(sala);
                 break;
             }
+            case "JOIN ROOM REJECTED": {
+                form.sendMessage("No te aceptaron para entrar a la sala!");
+                break;
+            }
             case "SALA_JOINED":{
                 String parametros = paquete.getStringParams();
                 form.sendMessage(parametros);
@@ -198,8 +202,8 @@ public class GameClient {
         if (isConnected()) {
             Paquete paquete = new Paquete();
             paquete.setComando("join request rejected");
-            paquete.addParam(tokenRoom);
-            paquete.addParam(usuario);
+            paquete.addParam(tokenRoom.toString());
+            paquete.setUsuario(usuario);
             Gson gson = new Gson();
             String mensaje = gson.toJson(paquete);
             sendMessage(mensaje);
