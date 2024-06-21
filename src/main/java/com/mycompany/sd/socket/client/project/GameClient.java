@@ -83,7 +83,7 @@ public class GameClient {
                 break;
             } 
             case "SENDING ROOMS": {
-               String x= (String)paquete.getParams().getLast();
+               String x= (String)paquete.getParams().get(paquete.getParams().size()-1);
                
                form.actualizarRooms(stringToArray(x, Sala[].class));
                break; 
