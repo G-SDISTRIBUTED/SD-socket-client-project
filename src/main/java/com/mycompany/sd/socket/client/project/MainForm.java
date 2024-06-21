@@ -42,11 +42,11 @@ public class MainForm extends FormularioObserver {
     }
     
     @Override
-    public void goRoom(){
-        SalaForm salaForm = new SalaForm(gameClient);
-            salaForm.setVisible(true);
-            dispose();
-            getRoomsThread.interrupt();
+    public void goRoom(Sala sala){
+        SalaForm salaForm = new SalaForm(gameClient, sala);
+        salaForm.setVisible(true);
+        dispose();
+        getRoomsThread.interrupt();
     }
     
     public static boolean containsNumber(String input) {

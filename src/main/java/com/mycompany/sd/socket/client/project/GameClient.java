@@ -6,8 +6,6 @@ package com.mycompany.sd.socket.client.project;
 import com.mycompany.paquete.*;
 import com.mycompany.paquete.Paquete;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import java.lang.ProcessBuilder.Redirect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -66,6 +64,7 @@ public class GameClient {
         if (null != comando) switch (comando) {
             case "LOGIN_SUCCESS":{
                 form.updateStatus("Inicio de sesión exitoso.");
+                this.usuario = paquete.getUsuario();
                 form.sendMessage("SUCCESS");
                 break;
             }
@@ -75,6 +74,7 @@ public class GameClient {
             }
             case "REGISTER_SUCCESS":{
                 form.updateStatus("Registro exitoso. Inicie sesión.");
+                this.usuario = paquete.getUsuario();
                 form.sendMessage("SUCCESS");
                 break;
             }
@@ -90,8 +90,7 @@ public class GameClient {
             }
             case "ROOM_CREATED": {
                 Sala sala = (Sala) paquete.getSala();
-                form.goRoom();
-                form.setRoom(sala);
+                form.goRoom(sala);
                 break;
             }
             case "RECIVING REQUEST TO JOIN ROOM":{
@@ -108,17 +107,28 @@ public class GameClient {
             }
             case "JOIN ROOM ACCEPTED": {
                 Sala sala = (Sala) paquete.getSala();
-                form.goRoom();
-                form.setRoom(sala);
+                form.goRoom(sala);
                 break;
             }
             case "JOIN ROOM REJECTED": {
                 form.sendMessage("No te aceptaron para entrar a la sala!");
                 break;
             }
-            case "SALA_JOINED":{
-                String parametros = paquete.getStringParams();
-                form.sendMessage(parametros);
+            case "LEFT THE ROOM":{
+                if(form instanceof SalaForm)
+                    form.exitRoom();
+                break;
+            }
+            case "CHANGE PLAYERS LIST":{
+                Sala sala = (Sala) paquete.getSala();
+                if(form instanceof SalaForm)
+                    form.setRoom(sala);
+                break;
+            }
+            case "ROOM DELETED":{
+                if(form instanceof SalaForm)
+                    form.exitRoom();
+                form.sendMessage("La sala ha sido eliminada");
                 break;
             }
             default:
@@ -133,7 +143,7 @@ public class GameClient {
     
     public void handleLogin(String username,String password) {
         if (isConnected()) {
-            usuario = new Usuario(username, password);
+            Usuario usuario = new Usuario(username, password);
             Paquete paquete = new Paquete(usuario, "login");
             Gson gson = new Gson();
             String jsonString = gson.toJson(paquete);
@@ -145,7 +155,7 @@ public class GameClient {
     
     public void handleRegister(String username,String password) {
         if (isConnected()) {
-            usuario = new Usuario(username, password);
+            Usuario usuario = new Usuario(username, password);
             Paquete paquete = new Paquete(usuario, "register");
             
             Gson gson = new Gson();
@@ -171,7 +181,6 @@ public class GameClient {
     
     public void handleRequestJoinRoom(Integer tokenSala){
         if (isConnected()) {
-//            Paquete paquete = new Paquete(sala, "request to join room");
             Paquete paquete = new Paquete();
             paquete.setComando("request to join room");
             paquete.addParam(tokenSala.toString());
@@ -224,4 +233,30 @@ public class GameClient {
         }
     }
     
+    public void handleExitRoom(Integer tokenRoom){
+        if (isConnected()) {
+            Paquete paquete = new Paquete();
+            paquete.setComando("exit room");
+            paquete.addParam(tokenRoom.toString());
+            paquete.setUsuario(usuario);
+            Gson gson = new Gson();
+            String mensaje = gson.toJson(paquete);
+            sendMessage(mensaje);
+        } else {
+            updateStatus("No hay conexión con el servidor.");
+        }
+    }
+    
+    public void handleDeleteRoom(Integer tokenRoom){
+        if (isConnected()) {
+            Paquete paquete = new Paquete();
+            paquete.setComando("delete room");
+            paquete.addParam(tokenRoom.toString());
+            Gson gson = new Gson();
+            String mensaje = gson.toJson(paquete);
+            sendMessage(mensaje);
+        } else {
+            updateStatus("No hay conexión con el servidor.");
+        }
+    }
 }
