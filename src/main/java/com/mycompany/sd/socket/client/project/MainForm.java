@@ -4,13 +4,21 @@
  * and open the template in the editor.
  */
 package com.mycompany.sd.socket.client.project;
+import com.mycompany.paquete.Sala;
+import java.util.*;
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.swing.JOptionPane;
 
 /**
  *
  * @author Pc
  */
 public class MainForm extends FormularioObserver {
-    private GameClient gameClient;
+    private final GameClient gameClient;
+    private List<Sala> rooms = new ArrayList<>();
+    Thread getRoomsThread;
     /**
      * Creates new form MainForm
      */
@@ -18,8 +26,59 @@ public class MainForm extends FormularioObserver {
         initComponents();
         this.gameClient = gameClient;
         this.gameClient.changeForm(this);
+        
+        getRoomsThread = new Thread(this::getRooms);
+        getRoomsThread.start();
     }
 
+    @Override
+    public void updateStatus(String message) {
+        status.setText(message);
+    }
+    
+    @Override
+    public void sendMessage(String message){
+        jLabel2.setText(message);
+    }
+    
+    @Override
+    public void goRoom(Sala sala){
+        SalaForm salaForm = new SalaForm(gameClient, sala);
+        salaForm.setVisible(true);
+        dispose();
+        getRoomsThread.interrupt();
+    }
+    
+    public static boolean containsNumber(String input) {
+        Pattern pattern = Pattern.compile("\\d"); // Expresión regular para dígitos
+        Matcher matcher = pattern.matcher(input);
+        return matcher.find();
+    }
+    
+    public void getRooms(){
+        try{
+            while(true){
+                gameClient.handleGetRooms();
+                Thread.sleep(10000);
+            }
+        }catch(InterruptedException e){
+            System.out.println(e.getMessage());
+        }
+    }
+    
+    @Override
+    public void actualizarRooms(List<Sala> rooms){
+        this.rooms = rooms;
+        actualizarLista();
+    }
+    
+    public void actualizarLista(){
+        listRooms.removeAll();
+        for(int i=0; i < rooms.size(); i++){
+            Sala room = rooms.get(i);
+            listRooms.add(room.toString());
+        }
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -30,9 +89,13 @@ public class MainForm extends FormularioObserver {
     private void initComponents() {
 
         jButton1 = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList<>();
         jLabel1 = new javax.swing.JLabel();
+        status = new javax.swing.JLabel();
+        jTextField1 = new javax.swing.JTextField();
+        jButton2 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
+        listRooms = new java.awt.List();
+        jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -43,54 +106,126 @@ public class MainForm extends FormularioObserver {
             }
         });
 
-        jList1.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
-        jScrollPane1.setViewportView(jList1);
+        jLabel1.setText("Token Sala:");
 
-        jLabel1.setText("SALAS DISPONIBLES");
+        jButton2.setText("Unirse a Sala");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
+        jButton3.setText("Ver Salas");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
+        listRooms.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                listRoomsItemStateChanged(evt);
+            }
+        });
+        listRooms.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                listRoomsActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(96, 96, 96)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                            .addGap(31, 31, 31)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addComponent(jLabel1))
-                    .addComponent(jButton1))
-                .addContainerGap(114, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(174, 174, 174)
+                        .addComponent(status))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(54, 54, 54)
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jButton2))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                            .addGap(114, 114, 114)
+                            .addComponent(jButton1)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 81, Short.MAX_VALUE)
+                            .addComponent(jButton3))
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                            .addContainerGap()
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(listRooms, javax.swing.GroupLayout.DEFAULT_SIZE, 358, Short.MAX_VALUE)
+                                .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
+                .addContainerGap(19, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addGap(23, 23, 23)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton1)
+                    .addComponent(jButton3))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(listRooms, javax.swing.GroupLayout.DEFAULT_SIZE, 172, Short.MAX_VALUE)
                 .addGap(16, 16, 16)
-                .addComponent(jButton1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(27, 27, 27))
+                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1)
+                    .addComponent(jButton2))
+                .addGap(18, 18, 18)
+                .addComponent(status)
+                .addGap(11, 11, 11))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
+        String name = JOptionPane.showInputDialog("Nombre de la sala:");       
+        gameClient.handleCreateSala(name);
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        listRooms.removeAll();
+        
+        for(int i=0; i < rooms.size(); i++){
+            listRooms.add(rooms.get(i).toString());
+        }
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        Integer tokenSala = Integer.parseInt(jTextField1.getText());
+        gameClient.handleRequestJoinRoom(tokenSala);
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void listRoomsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_listRoomsActionPerformed
+        
+    }//GEN-LAST:event_listRoomsActionPerformed
+
+    private void listRoomsItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_listRoomsItemStateChanged
+        
+        System.out.println("El item: "+listRooms.getSelectedItem());
+        System.out.println("Token de la sala seleccionada: " + rooms.get(listRooms.getSelectedIndex()).getToken());
+        
+        Integer tokenSala = rooms.get((Integer)listRooms.getSelectedIndex()).getToken();
+        gameClient.handleRequestJoinRoom(tokenSala);
+    }//GEN-LAST:event_listRoomsItemStateChanged
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JList<String> jList1;
-    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JTextField jTextField1;
+    private java.awt.List listRooms;
+    private javax.swing.JLabel status;
     // End of variables declaration//GEN-END:variables
 }

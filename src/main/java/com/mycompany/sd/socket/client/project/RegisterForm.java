@@ -100,13 +100,7 @@ public class RegisterForm extends FormularioObserver{
     private void handleRegister() {
         String username = jTextField1.getText();
         String password = new String(jTextField2.getText());
-        if (gameClient.isConnected()) {
-            jLabel3.setText("Registrando..");
-            String registerMessage = "REGISTER:" + username + ":" + password;
-            gameClient.sendMessage(registerMessage);
-        } else {
-            jLabel3.setText("No hay conexión con el servidor.");
-        }
+        gameClient.handleRegister(username, password);
     }
     
     @Override
